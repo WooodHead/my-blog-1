@@ -1,7 +1,9 @@
 import Head from "next/head";
 import { blogPosts, Post } from "../../lib/data";
+import { getDateStr } from "../utils";
 
-export default function BlogPage(post: Post | null) {
+export default function BlogPage(props: { slug: string } | null) {
+	const post = blogPosts.find((post) => post.slug === props?.slug);
 	return (
 		<div>
 			<Head>
@@ -10,8 +12,12 @@ export default function BlogPage(post: Post | null) {
 				</title>
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<main>
-				{post?.content}
+			<main className="space-y-2">
+				<div className="border-b-2 border-gray-200">
+					<div className="text-2xl font-bold">{post?.title}</div>
+					<div className="text-gray-600">{post?.date && getDateStr(post?.date)}</div>
+				</div>
+				<div>{post?.content}</div>
 			</main>
 		</div>
 	)
@@ -19,9 +25,8 @@ export default function BlogPage(post: Post | null) {
 
 export async function getStaticProps(context: { params?: { slug?: string } }) {
 	const slug = context?.params?.slug
-	const post = blogPosts.find((post) => post.slug === slug);
 	return {
-		props: post,
+		props: { slug },
 	}
 }
 

@@ -1,9 +1,9 @@
 export const getDateStr = (
-	date: Date,
+	date: Date | string,
 	options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
 ) => {
 	const formatter = new Intl.DateTimeFormat(getLang(), options)
-	return formatter.format(date);
+	return formatter.format(new Date(date));
 }
 
 export const getLang = () => {

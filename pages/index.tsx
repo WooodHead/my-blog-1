@@ -1,10 +1,10 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Link from 'next/link'
-import { blogPosts, Post } from '../lib/data'
+import { getAllPost, Post } from '../lib/data'
 import { getDateStr } from './utils'
 
-const Home: NextPage = () => {
+const Home: NextPage = (props: { posts: Post[] }) => {
   return (
     <div>
       <Head>
@@ -15,13 +15,23 @@ const Home: NextPage = () => {
       <main>
       </main>
       <div className="space-y-4">
-        {blogPosts.map(post => (
+        {props.posts.map((post, index) => (
           <PostItem key={post.slug} {...post} />
         )
         )}
       </div>
     </div>
   )
+}
+
+export async function getStaticProps(context: any) {
+  const allPosts = getAllPost();
+  console.log('allPosts', allPosts);
+  return {
+    props: {
+      posts: allPosts ?? []
+    }
+  }
 }
 
 function PostItem(post: Post) {

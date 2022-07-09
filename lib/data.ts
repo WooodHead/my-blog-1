@@ -1,23 +1,33 @@
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import { getDateStr } from "../pages/utils";
+
+const contentDirectory = path.join(process.cwd(), '_content');
+let allPost: Post[] | null;
+
+export function getAllPost(): Post[] {
+	const allPosts = fs.readdirSync(contentDirectory);
+	allPost = allPost ?? allPosts.map(fileName => {
+		const slug = fileName.replace('.md', '');
+		const fileContents = fs.readFileSync(
+			path.join(contentDirectory, fileName),
+			'utf-8'
+		);
+		const { data, content } = matter(fileContents)
+		return {
+			date: getDateStr(data.date) ?? "",
+			title: data.title ?? "",
+			content,
+			slug,
+		}
+	})
+	return allPost;
+}
+
 export interface Post {
 	title: string;
 	content: string;
-	date: Date;
+	date: string;
 	slug: string;
 }
-export const blogPosts: Post[] = [{
-	title: 'First Post',
-	content: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using, making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-	slug: 'first',
-	date: new Date(),
-}, {
-	slug: 'second',
-	title: 'My Second Post',
-	content: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using, making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-	date: new Date(),
-}, {
-	slug: 'third',
-	title: 'My Third Post',
-	content: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using, making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).',
-	date: new Date(),
-}
-];

@@ -1,9 +1,14 @@
 import Head from "next/head";
-import { blogPosts, Post } from "../../lib/data";
+import { getAllPost, Post } from "../../lib/data";
 import { getDateStr } from "../utils";
+import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote'
 
-export default function BlogPage(props: { slug: string } | null) {
-	const post = blogPosts.find((post) => post.slug === props?.slug);
+interface MDXPost extends Post {
+	mdxContent: MDXRemoteSerializeResult<Record<string, unknown>>;
+}
+
+export default function BlogPage(post: MDXPost) {
 	return (
 		<div>
 			<Head>
@@ -17,7 +22,7 @@ export default function BlogPage(props: { slug: string } | null) {
 					<div className="text-2xl font-bold">{post?.title}</div>
 					<div className="text-gray-600">{post?.date && getDateStr(post?.date)}</div>
 				</div>
-				<div>{post?.content}</div>
+				<div className="prose"><MDXRemote {...post.mdxContent} /></div>
 			</main>
 		</div>
 	)
@@ -25,15 +30,19 @@ export default function BlogPage(props: { slug: string } | null) {
 
 export async function getStaticProps(context: { params?: { slug?: string } }) {
 	const slug = context?.params?.slug
+	const post = getAllPost().find((post) => post.slug === slug);
+	const mdxSource = await serialize(post?.content ?? "");
+	(post as MDXPost).mdxContent = mdxSource;
 	return {
-		props: { slug },
+		props: post,
 	}
 }
 
 export async function getStaticPaths() {
+	getAllPost();
 	return {
 		paths:
-			blogPosts.map((post) => ({
+			getAllPost().map((post) => ({
 				params: {
 					slug: post.slug
 				}
